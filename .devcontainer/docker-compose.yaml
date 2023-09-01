@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    # Overrides default command so things don't shut down after the process ends.
+    command: sleep infinity
+    env_file:
+        # Ensure that the variables in .env match the same variables in devcontainer.json
+        - .env
+    volumes:
+      - ../..:/workspaces:cached
+    networks:
+      - demo
+
+  db:
+    image: postgres:alpine
+    env_file:
+        # Ensure that the variables in .env match the same variables in devcontainer.json
+        - .env
+    # Add "forwardPorts": ["5432"] to **devcontainer.json** to forward PostgreSQL locally.
+    # (Adding the "ports" property to this file will not forward from a Codespace.)
+    ports: ["5432:5432"]
+    networks:
+      - demo
+    volumes:
+      - ../db/postgres:/var/lib/postgresql/data
+      - ../db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+networks:
+    demo:
